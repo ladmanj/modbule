@@ -1,0 +1,39 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Core/Inc"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "arm-none-eabi-gcc",
+            "includePath": [
+                "/home/ladmanj/sw_projekty/mdbbl/**",
+                "/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Core/Inc"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/st/stm32cubeide_1.12.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.linux64_1.0.200.202301161003/tools/bin/arm-none-eabi-gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerPathInCppPropertiesJson": "/opt/st/stm32cubeide_1.12.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.linux64_1.0.200.202301161003/tools/bin/arm-none-eabi-gcc",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/home/ladmanj/sw_projekty/mdbbl/**",
+                    "/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Core/Inc",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "iostruct.h": "c",
+        "dma_uart.h": "c"
+    }
+}

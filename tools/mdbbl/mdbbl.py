@@ -116,7 +116,7 @@ if __name__ == "__main__":
     if (len(sys.argv) > 1):
         file = sys.argv[1]
     else:
-        port = "payload/pl_test/payload.bin"
+        file = "tools/mdbbl/payload/pl_test/payload.bin"
 
     if (len(sys.argv) > 2):
         port = sys.argv[2]
