@@ -24,6 +24,8 @@ from crc import Calculator, Configuration
 
 import sys
 
+import math
+
 config = Configuration(
     width=32,
     polynomial=0x04C11DB7,
@@ -76,35 +78,72 @@ async def run_async_simple_client(port: str, slave: int, baud: int, file: str):
 
     address = rr.registers[0] << 16 | rr.registers[1]
     length = rr.registers[2]
-    vector = rr.registers[3]
-    print("buffer address", hex(address),"length", length,"actual app. base", hex(vector))
+    vectab = int(0x8000000) + rr.registers[3]
+    print("buffer address", hex(address),"length", length,"actual app. base", hex(vectab))
 
     # uint8_t[] binary payload
     with open(file, 'rb') as file_t:
         binary = bytearray(file_t.read())
+        blocks = int(math.ceil(len(binary)/length))
+        tofill = length - len(binary)%length
+        
+        stack = unpack('<I',binary[0:4])
+        stack = stack[0]
+        reset = unpack('<I',binary[4:8])
+        reset = reset[0]
 
-    # prepend LE uint32_t load address (for payload with metadata)
-    binary = pack('<I',address) + binary
-    blen = len(binary)
+        calculator = Calculator(config)
 
-    # compute CRC for load address + payload
-    calculator = Calculator(config)
-    crc = calculator.checksum(binary)
+        flash = True
+        if (stack & int(0x20000000) == 0):
+            #probably not flash image
+            flash = False
+        if (reset & int(0x8000000) == 0):
+            flash = False
 
-    # prepend LE uint32_t CRC and uint32_t length of CRC'ed buffer
-    binary = pack('<2I', crc, blen) + binary
+        if flash:
+            if vectab == int(0x8000800):
+                target = 'A'
+            elif vectab == int(0x8008000):
+                target = 'B'
+            if reset > int(0x8000800) and reset < int(0x8008000):
+                source = 'A'
+            elif reset > int(0x8008000):
+                source = 'B'
+            if (source != target):
+                print(f"Binary ({source}) is incompatible with target ({target})")
+                client.close()
+                return
+            binary = binary + b'\xff' * tofill
+            app_crc = calculator.checksum(binary)
+            print("Crc of whole application " + hex(app_crc))
+            
 
-    # if the whole packet fits into anounced buffer, send it
-    if(len(binary) <= length):
-        # send the actual packet
-        vals = [int.from_bytes(binary[i:i+2],byteorder="little",signed=False) for i in range(0, len(binary), 2)]
-        await client.write_registers(address=90,slave=slave,values=vals)
-        val = unpack('<H',pack('<2s',b"bl"))
-        vals = [int(val[0]), int(val[0]^0x5a5a)]
-        await client.write_registers(address=0, slave=slave,values=vals)
-        rr = await client.read_holding_registers(address=0, slave=slave,count=2)
-        resp = pack('<2H',rr.registers[0],rr.registers[1])
-        print(resp)
+    for block in  range(blocks):
+        binary_block = binary[block*length:(1+block)*length]
+        # prepend LE uint32_t load address (for payload with metadata)
+            
+        binary_block = pack('<I',address) + binary_block
+        blen = len(binary_block)
+    
+        # compute CRC for load address + payload
+        
+        crc = calculator.checksum(binary_block)
+    
+        # prepend LE uint32_t CRC and uint32_t length of CRC'ed buffer
+        binary_block = pack('<2I', crc, blen) + binary_block
+    
+        # if the whole packet fits into anounced buffer, send it
+        if(len(binary_block) <= length):
+            # send the actual packet
+            vals = [int.from_bytes(binary_block[i:i+2],byteorder="little",signed=False) for i in range(0, len(binary_block), 2)]
+            await client.write_registers(address=90,slave=slave,values=vals)
+            val = unpack('<H',pack('<2s',b"bl"))
+            vals = [int(val[0]), int(val[0]^0x5a5a)]
+            await client.write_registers(address=0, slave=slave,values=vals)
+            rr = await client.read_holding_registers(address=0, slave=slave,count=2)
+            resp = pack('<2H',rr.registers[0],rr.registers[1])
+            print(resp)        
 
 
     print("close connection")
