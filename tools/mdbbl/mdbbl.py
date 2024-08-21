@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""Pymodbus modbule code uploader.
 
-usage: todo
+# Pymodbus modbule code uploader.
 
-"""
 import asyncio
 
 import pymodbus.client as ModbusClient
@@ -17,7 +15,7 @@ from struct import *
 from crc import Calculator, Configuration
 import sys
 import math
-from enum import Enum
+import argparse
 
 config = Configuration(
     width=32,
@@ -28,30 +26,25 @@ config = Configuration(
     reverse_output=False,
 )
 
-class Boot_type(Enum):
-
-    NONE = 0
-    PRIMARY = 1
-    SECONDARY = 2
-
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
-async def upload_mbl_firmware(port: str, slave: int, baud: int, file: str, boot: Boot_type):
-    """Run async client."""
+async def upload_mbl_firmware(args):
+    # Run async client.
+
     # activate debugging
     #pymodbus_apply_logging_config("DEBUG")
 
     print("get client")
     client = ModbusClient.AsyncModbusSerialClient(
-        port,
+        port=args.port,
         # timeout=10,
         # retries=3,
         # retry_on_empty=False,
         # strict=True,
-        baudrate=baud,
+        baudrate=args.baud,
         bytesize=8,
-        parity="N",
+        parity=args.par,
         stopbits=1,
         # handle_local_echo=False,
     )
@@ -64,7 +57,7 @@ async def upload_mbl_firmware(port: str, slave: int, baud: int, file: str, boot:
     print("get and verify data")
     try:
         # See all calls in client_calls.py
-        rr = await client.read_input_registers(address=17, count=4, slave=slave)
+        rr = await client.read_input_registers(address=17, count=4, slave=args.slave)
     except ModbusException as exc:
         print(f"Received ModbusException({exc}) from library")
         client.close()
@@ -84,7 +77,7 @@ async def upload_mbl_firmware(port: str, slave: int, baud: int, file: str, boot:
     print("buffer address", hex(address),"length", length,"actual app. base", hex(vectab))
 
     # uint8_t[] binary payload
-    with open(file, 'rb') as file_t:
+    with open(args.payload, 'rb') as file_t:
         binary = bytearray(file_t.read())
         blocks = int(math.ceil(len(binary)/length))
         tofill = length - len(binary)%length
@@ -141,63 +134,45 @@ async def upload_mbl_firmware(port: str, slave: int, baud: int, file: str, boot:
             vals = [int.from_bytes(binary_block[i:i+2],byteorder="little",signed=False) for i in range(0, len(binary_block), 2)]
             register = 90
             for batch in chunker(vals, 64):
-                await client.write_registers(address=register,slave=slave,values=batch)
+                await client.write_registers(address=register,slave=args.slave,values=batch)
                 register += len(batch)
             val = unpack('<H',pack('<2s',b"bl"))
             vals = [int(val[0]), int(val[0]^0x5a5a)]
-            await client.write_registers(address=0, slave=slave,values=vals)
-            rr = await client.read_holding_registers(address=0, slave=slave,count=2)
+            await client.write_registers(address=0, slave=args.slave,values=vals)
+            rr = await client.read_holding_registers(address=0, slave=args.slave,count=2)
             resp = pack('<2H',rr.registers[0],rr.registers[1])
             print(resp)
 
     if flash:
-        vals = pack('<I',app_crc)
-        if boot == Boot_type.PRIMARY:
-            register = 4
-        if boot == Boot_type.SECONDARY:
-            register = 6
-        if boot != Boot_type.NONE:
-            await client.write_registers(address=register,slave=slave,values=vals)
+        vals = unpack('<2H',pack('<I',app_crc))       # bug here
+        if args.boot == 'primary':
+            register = 4                # or here
+        if args.boot == 'secondary':
+            register = 6                # and/or here
+        if args.boot != 'none':
+            await client.write_registers(address=register,slave=args.slave,values=vals)  # or here
             val = unpack('<H',pack('<2s',b"wc"))
             vals = [int(val[0]), int(val[0]^0x5a5a)]
-            await client.write_registers(address=0, slave=slave,values=vals)
+            await client.write_registers(address=0, slave=args.slave,values=vals)
 
     print("close connection")
     client.close()
 
 if __name__ == "__main__":
 
-    if (len(sys.argv) > 1):
-        file = sys.argv[1]
-    else:
-        file = "tools/mdbbl/payload/pl_test/payload.bin"
+    parser = argparse.ArgumentParser(description='Upload code')
 
-    if (len(sys.argv) > 2):
-        if (sys.argv[2] == "primary"):
-            boot = Boot_type.PRIMARY
-        else: 
-            if (sys.argv[2] == "secondary"):
-                boot = Boot_type.SECONDARY
-    else:
-        boot = Boot_type.NONE
-
-    if (len(sys.argv) > 3):
-        port = sys.argv[3]
-    else:
-        port = "/dev/ttyUSB3"
-
-    if (len(sys.argv) > 4):
-        slave = int(sys.argv[4])
-    else:
-        slave = 1;
+    parser.add_argument('--port',default="/dev/ttyUSB3", type=str)
+    parser.add_argument('--slave',default=1, type=int)
+    parser.add_argument('--baud',default=57600, type=int)
+    parser.add_argument('--par', choices=['N','O','E'], default='N')
+    parser.add_argument('--boot', choices=['primary','secondary','none'], default='none')
+    parser.add_argument('--payload',default="tools/mdbbl/payload/pl_test/payload.bin", type=str)
     
-    if (len(sys.argv) > 5):
-        baud = int(sys.argv[5])
-    else:
-        baud = 57600;
-    
+    args = parser.parse_args()
+    print(args)
 
 
     asyncio.run(
-        upload_mbl_firmware(port, slave, baud, file, boot), debug=False
+        upload_mbl_firmware(args), debug=False
     )

@@ -21,7 +21,7 @@
             "console": "integratedTerminal",
             "purpose": ["debug-in-terminal"],
             "justMyCode": false,
-            "args": ["/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH A/modbule-0.32.bin"]
+            "args": ["--payload","/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH A/modbule-0.32.bin","--boot","secondary"]
         },
         {
             "name": "Python: flash B",
@@ -31,7 +31,7 @@
             "console": "integratedTerminal",
             "purpose": ["debug-in-terminal"],
             "justMyCode": false,
-            "args": ["/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH B/modbule-0.32.bin","primary"]
+            "args": ["--payload","/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH B/modbule-0.32.bin","--boot","primary"]
         },
         {
             "name": "Python: mconfig",
@@ -42,7 +42,8 @@
             "purpose": ["debug-in-terminal"],
             "justMyCode": false,
 //            "args": ["--pri_app_crc","200","--sec_app_crc","128","--pli","0","1","2","--pli","1","2","3","--pli","2","3","4","--plo","45","56","--relay","8","9","--logic","0","4","6","--logic","2","6","9","--comparators","0","0","0","0","0","--write"]
-            "args": ["--pri_app_crc","3735928559","--write"]                           
+            "args": ["--pri_app_crc","3735928559","--write"]
+//            "args": [""]
         }
 
 
