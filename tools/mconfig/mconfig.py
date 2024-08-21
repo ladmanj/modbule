@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# Pymodbus modbule config updater.
+
 import asyncio
 import sys
 import pymodbus.client as ModbusClient
@@ -52,7 +55,8 @@ config = construct.Struct(
 
 #config.parse(b)
 async def read_write_mbl_config(args):        #port: str, slave: int, baud: int, 
-    """Run async client."""
+    # Run async client.
+
     # activate debugging
     #pymodbus_apply_logging_config("DEBUG")
 
@@ -101,7 +105,7 @@ async def read_write_mbl_config(args):        #port: str, slave: int, baud: int,
 
     cfg = config.parse(data)
 
-#    print(cfg)
+    print(cfg)
 
     if args.pri_app_crc != None:
          cfg.pri_app_crc = args.pri_app_crc
