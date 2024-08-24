@@ -16,6 +16,7 @@ from crc import Calculator, Configuration
 import sys
 import math
 import argparse
+import time
 
 config = Configuration(
     width=32,
@@ -73,6 +74,11 @@ async def upload_mbl_firmware(args):
 
     address = rr.registers[0] << 16 | rr.registers[1]
     length = rr.registers[2]
+    if address == 0 or length == 0:
+        print(f"Invalid response")
+        client.close()
+        return
+
     vectab = int(0x8000000) + rr.registers[3]
     print("buffer address", hex(address),"length", length,"actual app. base", hex(vectab))
 
@@ -136,12 +142,15 @@ async def upload_mbl_firmware(args):
             for batch in chunker(vals, 64):
                 await client.write_registers(address=register,slave=args.slave,values=batch)
                 register += len(batch)
-            val = unpack('<H',pack('<2s',b"bl"))
-            vals = [int(val[0]), int(val[0]^0x5a5a)]
+            vals = unpack('<2H',pack('<4s',b"bl86"))
             await client.write_registers(address=0, slave=args.slave,values=vals)
             rr = await client.read_holding_registers(address=0, slave=args.slave,count=2)
-            resp = pack('<2H',rr.registers[0],rr.registers[1])
-            print(resp)
+            resp = pack('<2H',rr.registers[0],rr.registers[1]).decode("utf-8")
+            print(block+1,"/",blocks,resp)
+            if resp == "Err-":
+                print(f"Block rejected.")
+                client.close()
+                return
 
     if flash:
         vals = unpack('<2H',pack('<I',app_crc))       # bug here
@@ -151,9 +160,19 @@ async def upload_mbl_firmware(args):
             register = 6                # and/or here
         if args.boot != 'none':
             await client.write_registers(address=register,slave=args.slave,values=vals)  # or here
-            val = unpack('<H',pack('<2s',b"wc"))
-            vals = [int(val[0]), int(val[0]^0x5a5a)]
+            vals = unpack('<2H',pack('<4s',b"wc-9"))
             await client.write_registers(address=0, slave=args.slave,values=vals)
+            rr = await client.read_holding_registers(address=0, slave=args.slave,count=2)
+            resp = pack('<2H',rr.registers[0],rr.registers[1]).decode("utf-8")
+            print(resp)
+            
+    if args.restart == 'clean':
+        vals = unpack('<2H',pack('<4s',b"rs()"))
+    if args.restart == 'fail':
+        vals = unpack('<2H',pack('<4s',b"fail"))
+    if args.restart:
+        time.sleep(0.5)
+        await client.write_registers(address=0, slave=args.slave,values=vals)
 
     print("close connection")
     client.close()
@@ -168,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument('--par', choices=['N','O','E'], default='N')
     parser.add_argument('--boot', choices=['primary','secondary','none'], default='none')
     parser.add_argument('--payload',default="tools/mdbbl/payload/pl_test/payload.bin", type=str)
-    
+    parser.add_argument('--restart',choices=['clean','fail'])
     args = parser.parse_args()
     print(args)
 
