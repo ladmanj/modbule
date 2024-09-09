@@ -1,4 +1,4 @@
-#Modbule hardware
+# Modbule hardware
 Fully functional, reliable version of the PCB.
 
 Drawn in KiCad (previous versions involved but imported to KiCad 8).
