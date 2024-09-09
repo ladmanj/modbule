@@ -1,4 +1,4 @@
-#Modbule firmware
+# Modbule firmware
 You need arm-none-eabi-gcc toolchain version 12.3.1 or similar.
 
 To build everything do:
@@ -17,13 +17,13 @@ It is been built automaticaly as dependency of the boot program by the recipe ab
 
 You can find the remote upload and configuration tools in its directories nearby.
 
-##The architectue
-###mblboot
+## The architecture
+### mblboot
 is very small and very limited program which sits at the start of the flash memory.
 It isn't a boot loader it can't receive a updated firmware by any means.
 Everything it does is checking CRC checksums of the two application programs and selects which one has to be run.
 
-###modbule
+### modbule
 Next in the flash memory there are two copies of the main application
 
 By default they're practicaly the same with the exception that they are linked to run at different addresses.
@@ -33,7 +33,7 @@ Any of the two applications can receive and update its counterpart in flash.
 
 The aplications can also receive a user defined code to be run in ram after succesful integrity check. This is prepared as a way to do any rescue and repair operations not known to the author at the time of writing these lines.
 
-####Configuration
+#### Configuration
 At the end of the flash memory, there is a data block holding a configuration.
 
 The configuration is used both by the boot program and the two applications.
