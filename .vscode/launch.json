@@ -1,11 +1,8 @@
 {
-    // Pro informace o možných atributech použijte technologii IntelliSense.
-    // Umístěním ukazatele myši zobrazíte popisy existujících atributů.
-    // Další informace najdete tady: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Aktuální soubor",
+            "name": "Python: Actual File ",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -21,7 +18,7 @@
             "console": "integratedTerminal",
             "purpose": ["debug-in-terminal"],
             "justMyCode": false,
-            "args": ["--payload","/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH A/modbule-0.32.bin","--boot","secondary"]
+            "args": ["--payload","tools/mdbbl/payload/modbule_a.bin","--boot","primary"]
         },
         {
             "name": "Python: flash B",
@@ -31,7 +28,7 @@
             "console": "integratedTerminal",
             "purpose": ["debug-in-terminal"],
             "justMyCode": false,
-            "args": ["--payload","/home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Release FLASH B/modbule-0.32.bin","--boot","primary"]
+            "args": ["--payload","tools/mdbbl/payload/modbule_b.bin","--boot","secondary"]
         },
         {
             "name": "Python: mconfig",

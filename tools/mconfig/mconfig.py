@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+__author__ = "Jakub Ladman"
+__copyright__ = "Copyright 2024"
+__credits__ = ["Jakub Ladman, Pymodbus authors"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Jakub Ladman"
+__email__ = "ladmanj@volny.cz"
+__status__ = "Testing"
+
 # Pymodbus modbule config updater.
 
 import asyncio
@@ -185,8 +194,7 @@ async def read_write_mbl_config(args):        #port: str, slave: int, baud: int,
         data = config.build(cfg)
         vals = [int.from_bytes(data[i:i+2],byteorder="little",signed=False) for i in range(0, len(data), 2)]
         await client.write_registers(address=4,slave=args.slave,values=vals)
-        val = struct.unpack('<H',struct.pack('<2s',b"wc"))
-        vals = [int(val[0]), int(val[0]^0x5a5a)]
+        vals = struct.unpack('<2H',struct.pack('<4s',b"wc-9"))
         await client.write_registers(address=0, slave=args.slave,values=vals)
 
 

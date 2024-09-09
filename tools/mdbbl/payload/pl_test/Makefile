@@ -7,7 +7,7 @@ CPY = arm-none-eabi-objcopy
 
 SRCS = $(shell find . -maxdepth 1 -name '*.c')
 OBJS  = $(patsubst %.c,%.o,$(SRCS))
-INCDIR = /home/ladmanj/STM32CubeIDE/workspace_1.12.0/modbule-0.32/Core/Inc
+INCDIR = ../../../../firmware/modbule/Core/Inc/
 
 CFLAGS = -mcpu=cortex-m0plus -std=gnu11 --specs=nano.specs -mfloat-abi=soft -mthumb -Os -fpie -nostdlib -nostartfiles --entry=$(entry) -I$(INCDIR)
 LDFLAGS = -Wl,-nostdlib,-pie,-Ttext=$(entry)

@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+__author__ = "Jakub Ladman"
+__copyright__ = "Copyright 2024"
+__credits__ = ["Jakub Ladman, Pymodbus authors"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Jakub Ladman"
+__email__ = "ladmanj@volny.cz"
+__status__ = "Testing"
+
 # Pymodbus modbule code uploader.
 
 import asyncio
@@ -82,22 +91,28 @@ async def upload_mbl_firmware(args):
     vectab = int(0x8000000) + rr.registers[3]
     print("buffer address", hex(address),"length", length,"actual app. base", hex(vectab))
 
+    try:
     # uint8_t[] binary payload
-    with open(args.payload, 'rb') as file_t:
-        binary = bytearray(file_t.read())
-        blocks = int(math.ceil(len(binary)/length))
-        tofill = length - len(binary)%length
-        
-        # if this is a image of flash, those are initial stack pointer and reset vector
-        stack = unpack('<I',binary[0:4])[0]
-        reset = unpack('<I',binary[4:8])[0]
+        with open(args.payload, 'rb') as file_t:
+            binary = bytearray(file_t.read())
+            blocks = int(math.ceil(len(binary)/length))
+            tofill = length - len(binary)%length
 
-        calculator = Calculator(config)
+            # if this is a image of flash, those are initial stack pointer and reset vector
+            stack = unpack('<I',binary[0:4])[0]
+            reset = unpack('<I',binary[4:8])[0]
 
-        flash = True
-        if (stack & int(0x20000000) == 0) or (reset & int(0x8000000) == 0):
-            #probably not flash image
-            flash = False
+            calculator = Calculator(config)
+
+            flash = True
+            if (stack & int(0x20000000) == 0) or (reset & int(0x8000000) == 0):
+                #probably not flash image
+                flash = False
+    except FileNotFoundError:
+        print("File not found.")
+        flash = False
+        blocks = 0
+    finally:
 
         if flash:
             if vectab == int(0x8000800):
@@ -128,7 +143,6 @@ async def upload_mbl_firmware(args):
         blen = len(binary_block)
     
         # compute CRC for load address + payload
-        
         crc = calculator.checksum(binary_block)
     
         # prepend LE uint32_t CRC and uint32_t length of CRC'ed buffer
@@ -153,13 +167,13 @@ async def upload_mbl_firmware(args):
                 return
 
     if flash:
-        vals = unpack('<2H',pack('<I',app_crc))       # bug here
+        vals = unpack('<2H',pack('<I',app_crc))
         if args.boot == 'primary':
-            register = 4                # or here
+            register = 4
         if args.boot == 'secondary':
-            register = 6                # and/or here
+            register = 6
         if args.boot != 'none':
-            await client.write_registers(address=register,slave=args.slave,values=vals)  # or here
+            await client.write_registers(address=register,slave=args.slave,values=vals)
             vals = unpack('<2H',pack('<4s',b"wc-9"))
             await client.write_registers(address=0, slave=args.slave,values=vals)
             rr = await client.read_holding_registers(address=0, slave=args.slave,count=2)
@@ -168,8 +182,10 @@ async def upload_mbl_firmware(args):
             
     if args.restart == 'clean':
         vals = unpack('<2H',pack('<4s',b"rs()"))
+        print("Doing clean restart ...")
     if args.restart == 'fail':
         vals = unpack('<2H',pack('<4s',b"fail"))
+        print("Waiting to watch dog bark ...")
     if args.restart:
         time.sleep(0.5)
         await client.write_registers(address=0, slave=args.slave,values=vals)
