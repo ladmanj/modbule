@@ -4,9 +4,7 @@ AS = arm-none-eabi-gcc
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 CPY = arm-none-eabi-objcopy
-
 UC = $(shell echo '$1' | tr '[:lower:]' '[:upper:]')
-
 
 OBJ_DIR_DEBUG = obj_debug
 OBJ_DIR_REL_A = obj_rel_a
@@ -27,13 +25,13 @@ OBJS_REL_B  = $(filter %.o,$(CSRCS:%.c=$(OBJ_DIR_REL_B)/%.o))
 OBJS_REL_B += $(filter %.o,$(ASRCS:%.s=$(OBJ_DIR_REL_B)/%.o))
 OBJS_REL_B += $(filter %.o,$(ASRCS:%.S=$(OBJ_DIR_REL_B)/%.o))
 
-CFLAGS_DEBUG 	= -g3 -O0 -DVECT_TAB_BASE_ADDRESS=0x8000000 -DDEBUG
+CFLAGS_DEBUG	= -g3 -O0 -DVECT_TAB_BASE_ADDRESS=0x8000000 -DDEBUG
 CFLAGS_REL_A	= -g0 -Os -DVECT_TAB_BASE_ADDRESS=0x8000800
 CFLAGS_REL_B	= -g0 -Os -DVECT_TAB_BASE_ADDRESS=0x8008000
 
-LDFLAGS_REL_A	= -T"STM32G031G8UX_FLASH_A.ld"	-Wl,-Map=$(target)_release_a.map
-LDFLAGS_REL_B	= -T"STM32G031G8UX_FLASH_B.ld"	-Wl,-Map=$(target)_release_b.map
-LDFLAGS_DEBUG 	= -T"STM32G031G8UX_debug.ld"	-Wl,-Map=$(target)_debug.map
+LDFLAGS_REL_A	= -T"STM32G031G8UX_FLASH_A.ld"	-Wl,-Map=$(target)_rel_a.map
+LDFLAGS_REL_B	= -T"STM32G031G8UX_FLASH_B.ld"	-Wl,-Map=$(target)_rel_b.map
+LDFLAGS_DEBUG	= -T"STM32G031G8UX_debug.ld"	-Wl,-Map=$(target)_debug.map
 
 CFLAGS_DEFAULT = -mcpu=cortex-m0plus -std=gnu11 \
 -DUSE_HAL_DRIVER \
@@ -52,7 +50,7 @@ CFLAGS_DEFAULT = -mcpu=cortex-m0plus -std=gnu11 \
 ASFLAGS = -mcpu=cortex-m0plus -DMODBULE_MCU=STM32G031xx -x assembler-with-cpp \
 --specs=nano.specs -mfloat-abi=soft -mthumb
 
-LDFLAGS_DEFAULT = -mcpu=cortex-m0plus  --specs=nosys.specs \
+LDFLAGS_DEFAULT = -mcpu=cortex-m0plus --specs=nosys.specs \
 -Wl,--gc-sections -static \
 -Wl,--no-warn-rwx-segments --specs=nano.specs -mfloat-abi=soft -mthumb \
 -Wl,--start-group -lc -lm -Wl,--end-group
@@ -110,7 +108,7 @@ $(OBJ_DIR)/%.o: %.S
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o  $@
+	$(CC) $(CFLAGS) -c $< -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 clean:
 	rm -rf $(OBJ_DIR_DEBUG) $(OBJ_DIR_REL_A) $(OBJ_DIR_REL_B) *.elf *.bin *.h *.map

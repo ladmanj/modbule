@@ -46,7 +46,7 @@ CFLAGS_DEFAULT = -mcpu=cortex-m0plus -std=gnu11 \
 ASFLAGS = -mcpu=cortex-m0plus -DMODBULE_MCU=STM32G031xx -x assembler-with-cpp \
 --specs=nano.specs -mfloat-abi=soft -mthumb
 
-LDFLAGS_DEFAULT = -mcpu=cortex-m0plus  --specs=nosys.specs \
+LDFLAGS_DEFAULT = -mcpu=cortex-m0plus --specs=nosys.specs \
 -Wl,--gc-sections -static \
 -Wl,--no-warn-rwx-segments --specs=nano.specs -mfloat-abi=soft -mthumb \
 -Wl,--start-group -lc -lm -Wl,--end-group
@@ -94,11 +94,11 @@ $(OBJ_DIR)/%.o: %.s
 
 $(OBJ_DIR)/%.o: %.S
 	mkdir -p $(@D)
-	$(AS) $(ASFLAGS) -c $< -o  $@
+	$(AS) $(ASFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o  $@
+	$(CC) $(CFLAGS) -c $< -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 clean:
 	rm -rf $(OBJ_DIR_DEBUG) $(OBJ_DIR_RELEASE) *.elf *.bin *.map
