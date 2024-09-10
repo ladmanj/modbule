@@ -23,6 +23,8 @@ is very small and very limited program which sits at the start of the flash memo
 It isn't a boot loader it can't receive a updated firmware by any means.
 Everything it does is checking CRC checksums of the two application programs and selects which one has to be run.
 
+If built with the default procedure then the resulting binary includes two copies of the application described next.
+
 ### modbule
 Next in the flash memory there are two copies of the main application
 
