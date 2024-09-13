@@ -8,3 +8,6 @@ firmware/modbule/obj_rel_a
 firmware/modbule/obj_rel_b
 firmware/modbule/obj_debug
 firmware/modbule/*.map
+firmware/mblboot/.gdbinit
+firmware/mblboot/.gdb_history
+.vscode/settings.json

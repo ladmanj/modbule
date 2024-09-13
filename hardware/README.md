@@ -2,6 +2,7 @@
 Fully functional, reliable version of the PCB.
 
 Drawn in KiCad (previous versions involved but imported to KiCad 8).
+
 ![PCB layout](kicad_3d_preview.png)
 
 Now there are only previews. The full sources will be released after succesfull funding.
@@ -19,4 +20,7 @@ Multiple licensing is also possible if you are interrested in.
 Don't hesitate to contact me.
 
 ![schematic intentionaly not readable](kicad_schematic_preview.png)
+
+![photo of the board running tests](running_tests.jpg)
+
 

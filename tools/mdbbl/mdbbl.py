@@ -139,7 +139,7 @@ async def upload_mbl_firmware(args):
         binary_block = binary[block*length:(1+block)*length]
         # prepend LE uint32_t load address (for payload with metadata)
             
-        binary_block = pack('<I',address) + binary_block
+        binary_block = pack('<I',address+block*length) + binary_block
         blen = len(binary_block)
     
         # compute CRC for load address + payload
