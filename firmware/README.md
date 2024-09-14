@@ -30,31 +30,32 @@ If built with the default procedure, the resulting binary includes two copies of
 |------------|--------------------|-------------------|------------|
 | RAM        | 0x0000000020000000 | 0x0000000000000100 | xrw        |
 | FLASH      | 0x0000000008000000 | 0x0000000000000800 | xr         |
-| FLASH_APA  | 0x0000000008000800 | 0x0000000000007800 | xr         |
-| FLASH_APB  | 0x0000000008008000 | 0x0000000000007800 | xr         |
-| UFLASH     | 0x000000000800f800 | 0x0000000000000800 | rw         |
+| FLASH_APA<kbd>[^1]</kbd>  | 0x0000000008000800 | 0x0000000000007800 | xr         |
+| FLASH_APB<kbd>[^2]</kbd>  | 0x0000000008008000 | 0x0000000000007800 | xr         |
+| UFLASH<kbd>[^3]</kbd>     | 0x000000000800f800 | 0x0000000000000800 | rw         |
 
 ### modbule
 
 Next in the flash memory are two copies of the main application.
 
-**FLASH corresponds to FLASH_APA:**
+
 
 | Name   | Origin             | Length            | Attributes |
 |--------|--------------------|-------------------|------------|
 | RAM    | 0x0000000020000100 | 0x0000000000001f00 | rw         |
-| FLASH  | 0x0000000008000800 | 0x0000000000007800 | xr         |
-| UFLASH | 0x000000000800f800 | 0x0000000000000800 | rw         |
+| FLASH<kbd>[^1]</kbd>  | 0x0000000008000800 | 0x0000000000007800 | xr         |
+| UFLASH<kbd>[^3]</kbd> | 0x000000000800f800 | 0x0000000000000800 | rw         |
 
-**FLASH corresponds to FLASH_APB:**
 
 | Name   | Origin             | Length            | Attributes |
 |--------|--------------------|-------------------|------------|
 | RAM    | 0x0000000020000100 | 0x0000000000001f00 | rw         |
-| FLASH  | 0x0000000008008000 | 0x0000000000007800 | xr         |
-| UFLASH | 0x000000000800f800 | 0x0000000000000800 | rw         |
+| FLASH<kbd>[^2]</kbd>  | 0x0000000008008000 | 0x0000000000007800 | xr         |
+| UFLASH<kbd>[^3]</kbd> | 0x000000000800f800 | 0x0000000000000800 | rw         |
 
-The `UFLASH` section is common to all three programs.
+[^1]: The `FLASH` corresponds to `FLASH_APA`.
+[^2]: The `FLASH` corresponds to `FLASH_APB`.
+[^3]: The `UFLASH` section is common to all three programs.
 
 By default, they are practically the same, except that they are linked to run at different addresses. As they are later updated, their versions and functionality can differ.
 
