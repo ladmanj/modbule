@@ -16,13 +16,11 @@ import asyncio
 import pymodbus.client as ModbusClient
 from pymodbus import (
     ExceptionResponse,
-    Framer,
     ModbusException,
     pymodbus_apply_logging_config,
 )
 from struct import *
 from crc import Calculator, Configuration
-import sys
 import math
 import argparse
 import time
